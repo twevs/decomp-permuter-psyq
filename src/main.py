@@ -286,7 +286,7 @@ def run_inner(options: Options, heartbeat: Callable[[], None]) -> List[int]:
     name_counts: Dict[str, int] = {}
     for i, d in enumerate(options.directories):
         heartbeat()
-        compile_cmd = os.path.join(d, "compile.sh")
+        compile_cmd = os.path.join(d, "compile.bat")
         target_o = os.path.join(d, "target.o")
         base_c = os.path.join(d, "base.c")
         for fname in [compile_cmd, target_o, base_c]:
