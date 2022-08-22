@@ -36,6 +36,7 @@ class Line:
 class ArchSettings:
     name: str
     objdump: List[str]
+    objdump_params: List[str]
     re_comment: Pattern[str]
     re_reg: Pattern[str]
     re_sprel: Pattern[str]
@@ -140,10 +141,26 @@ MIPS_SETTINGS: ArchSettings = ArchSettings(
     sp_ref_insns=["addiu"],
     reloc_str="R_MIPS_",
     objdump=["mips-linux-gnu-objdump", "-drz", "-m", "mips:4300"],
+    objdump_params=[],
     branch_likely_instructions=MIPS_BRANCH_LIKELY_INSTRUCTIONS,
     branch_instructions=MIPS_BRANCH_INSTRUCTIONS,
 )
 
+MIPS_PSX_SETTINGS: ArchSettings = ArchSettings(
+    name="mips_psx",
+    re_comment=re.compile(r"<.*?>"),
+    re_reg=re.compile(
+        r"\$?\b(a[0-3]|t[0-9]|s[0-8]|at|v[01]|f[12]?[0-9]|f3[01]|k[01]|fp|ra)\b"  # leave out $zero, $sp
+    ),
+    re_sprel=re.compile(r"(?<=,)([0-9]+|0x[0-9a-f]+)\((sp|s8)\)"),
+    re_includes_sp=re.compile(r"\b(sp|s8)\b"),
+    sp_ref_insns=["addiu"],
+    reloc_str="R_MIPS_",
+    objdump=["tools/MDasm2.exe"],
+    objdump_params=["-o", "-b"],
+    branch_likely_instructions=MIPS_BRANCH_LIKELY_INSTRUCTIONS,
+    branch_instructions=MIPS_BRANCH_INSTRUCTIONS,
+)
 
 PPC_SETTINGS: ArchSettings = ArchSettings(
     name="ppc",
@@ -154,6 +171,7 @@ PPC_SETTINGS: ArchSettings = ArchSettings(
     re_sprel=re.compile(r"(?<=,)(-?[0-9]+|-?0x[0-9a-f]+)\(r1\)"),
     reloc_str="R_PPC_",
     objdump=["powerpc-eabi-objdump", "-dr", "-EB", "-mpowerpc", "-M", "broadway"],
+    objdump_params=[],
     branch_instructions=PPC_BRANCH_INSTRUCTIONS,
     branch_likely_instructions=PPC_BRANCH_LIKELY_INSTRUCTIONS,
 )
@@ -175,6 +193,7 @@ ARM32_SETTINGS: ArchSettings = ArchSettings(
     re_sprel=re.compile(r"sp, #-?(0x[0-9a-fA-F]+|[0-9]+)\b"),
     reloc_str="R_ARM_",
     objdump=["arm-none-eabi-objdump", "-drz"],
+    objdump_params=[],
     branch_instructions=ARM32_BRANCH_INSTRUCTIONS,
     branch_likely_instructions=set(),
 )
@@ -194,6 +213,8 @@ def get_arch(o_file: str) -> ArchSettings:
         return PPC_SETTINGS
     if arch == 40:
         return ARM32_SETTINGS
+    if arch == 518:
+        return MIPS_PSX_SETTINGS
     raise Exception("Bad ELF")
 
 
@@ -418,7 +439,7 @@ def simplify_objdump(
 def objdump(
     o_filename: str, arch: ArchSettings, *, stack_differences: bool = False
 ) -> List[Line]:
-    output = subprocess.check_output(arch.objdump + [o_filename])
+    output = subprocess.check_output(arch.objdump + [o_filename] + arch.objdump_params)
     lines = output.decode("utf-8").splitlines()
     return simplify_objdump(lines, arch, stack_differences=stack_differences)
 

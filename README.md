@@ -1,4 +1,20 @@
+
 # Decomp permuter
+
+## MGS Specific  
+
+This is a branch of simonlindholm's decomp permuter that is set up for use with MGS1 for the PSX.  Please see the Decomp Permuter usage below for prerequisites. These are the required steps to run permutations on a function. Currently it is set up for Windows, compile_cmd in src/main.py must be modified to use compile.sh for Linux. I have not tested compile.sh
+
+- Add the object file you are trying to match into the mgs directory named as 'target.o'
+- Add your functions source code to base.c in the mgs directory
+- Add your function name into the settings.toml file in the mgs directory
+- Modify settings.toml to change weights if you require it
+- Either add the path to your PsyQ SDKs as an environment variable or hardcode TOOLS_PATH to point to them
+- Modify compile.bat/compile.sh if you require to change the compiler used 
+- Run permuter.py with mgs as the directory input as stated in the main decomp permuter instructions.
+- Alternatively If you are using a windows machine you can open run.bat in the root folder to start permuting.
+
+## Decomp Permuter
 
 Automatically permutes C files to better match a target binary. The permuter has two modes of operation:
 - Random: purely at random, introduce temporary variables for values, change types, put statements on the same line...

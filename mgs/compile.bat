@@ -1,0 +1,12 @@
+set TOOLS_PATH=%PSYQ_SDK%
+
+SET INPUT=%1
+SET OUTPUT=%3
+SET TMP=%3_tmp
+
+SET CPPPSX=%TOOLS_PATH%\psyq_4.3\bin\CPPPSX.EXE -undef -D__GNUC__=2 -D__OPTIMIZE__ -lang-c -Dmips -D__mips__ -D__mips -Dpsx -D__psx__ -D__psx -D_PSYQ -D__EXTENSIONS__ -D_MIPSEL -D__CHAR_UNSIGNED__ -D_LANGUAGE_C -DLANGUAGE_C %INPUT%
+SET CC1PSX=%TOOLS_PATH%\psyq_4.4\bin\CC1PSX.EXE -quiet -O2 -G0 -g0 -o %TMP%
+SET ASPSX=%TOOLS_PATH%\psyq_4.3\bin\ASPSX.EXE -q -G0 -g0 %TMP% -o %OUTPUT%
+
+%CPPPSX% | %CC1PSX%
+%ASPSX%
